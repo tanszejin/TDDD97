@@ -15,29 +15,28 @@
                 <fieldset id="signin-fieldset">
                 <!-- <h2>Sign in:</h2> -->
                 <form id="signin-form">
-                    <div class="info><label for="email" id="signin-email-label">Email:</label><input id="signin-email" type="email" placeholder="example@email.com" required></input></div>
-                    <label for="password" id="password-label">Password: <input id="signin-password" type="password" minlength="8" required></input></label>
-                    <div class="feedback" id="signin-feedback"></div>
+                    <label for="email" class="field" id="signin-email-label">Email:</label><input class="value" id="signin-email" type="email" placeholder="example@email.com" required></input>
+                    <label for="password" class="field" id="password-label">Password:</label><input class="value" id="signin-password" type="password" minlength="8" required></input>
+                    <div class="feedback" class="field" id="signin-feedback"></div>
                     <input id="submit" type="submit" value="Sign in"/>
                 </form>
                 </fieldset>
                 <fieldset id="signup-fieldset">
                 <!-- <h3>New user? Sign up here:</h3> -->
                 <form id="signup-form">
-                    <label for="firstname" id="firstname-label">First name: <input id="firstname" type="text" placeholder="John" required></input></label>
-                    <label for="familyname" id="familyname-label">Family name: <input id="familyname" type="text" placeholder="Doe" required></input></label>
-                    <label for="email" id="signup-email-label">Email: <input id="signup-email" type="email" placeholder="example@email.com" required></input></label>
-                    <label for="gender">Gender<select id="gender" required>
+                    <label for="firstname" class="field" id="firstname-label">First name:</label><input class="value" id="firstname" type="text" placeholder="John" required></input>
+                    <label for="familyname" class="field" id="familyname-label">Family name:</label><input class="value" id="familyname" type="text" placeholder="Doe" required></input>
+                    <label for="email" class="field" id="signup-email-label">Email:</label><input class="value" id="signup-email" type="email" placeholder="example@email.com" required></input>
+                    <label for="gender" class="field">Gender</label><select class="value" id="gender" required>
                     <option value="">(select one)</option>
                     <option value="m">Male</option>
                     <option value="f">Female</option>
                     <option value="o">Other</option>
                     </select>
-                    </label>
-                    <label for="city" id="city-label">City: <input id="city" type="text" required></input></label>
-                    <label for="country" id="country-label">Country: <input id="country" type="text" required></input></label>
-                    <label for="password" id="password-label">Password: <input id="signup-password" type="password" minlength="8" required></input></label>
-                    <label for="repeatpassword" id="repeatpassword-label">Repeat password: <input id="signup-repeatpassword" type="password" required></input></label>
+                    <label for="city" class="field" id="city-label">City:</label><input class="value" id="city" type="text" required></input>
+                    <label for="country" class="field" id="country-label">Country:</label><input class="value" id="country" type="text" required></input>
+                    <label for="password" class="field" id="password-label">Password:</label><input class="value" id="signup-password" type="password" minlength="8" required></input>
+                    <label for="repeatpassword" class="field" id="repeatpassword-label">Repeat pw:</label><input class="value" id="signup-repeatpassword" type="password" required></input>
                     <div class="feedback" id="signup-feedback"></div>
                     <input id="submit" type="submit" value="Sign up"/>
                 </form>
