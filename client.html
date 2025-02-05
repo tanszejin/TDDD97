@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>My Web Page</title>
+        <link href="client.css" type="text/css" rel="stylesheet">        
+        <script src="serverstub.js" defer></script>
+        <script src="client.js" defer></script>
+
+        <script id="welcomeview" type="text/view">
+            <!-- <h1 class="title">Welcome</h1> -->
+            <div id="welcome-container">
+              <img src="wimage.png"/>
+              <div id="forms">
+                <fieldset id="signin-fieldset">
+                <!-- <h2>Sign in:</h2> -->
+                <form id="signin-form">
+                    <div class="info><label for="email" id="signin-email-label">Email:</label><input id="signin-email" type="email" placeholder="example@email.com" required></input></div>
+                    <label for="password" id="password-label">Password: <input id="signin-password" type="password" minlength="8" required></input></label>
+                    <div class="feedback" id="signin-feedback"></div>
+                    <input id="submit" type="submit" value="Sign in"/>
+                </form>
+                </fieldset>
+                <fieldset id="signup-fieldset">
+                <!-- <h3>New user? Sign up here:</h3> -->
+                <form id="signup-form">
+                    <label for="firstname" id="firstname-label">First name: <input id="firstname" type="text" placeholder="John" required></input></label>
+                    <label for="familyname" id="familyname-label">Family name: <input id="familyname" type="text" placeholder="Doe" required></input></label>
+                    <label for="email" id="signup-email-label">Email: <input id="signup-email" type="email" placeholder="example@email.com" required></input></label>
+                    <label for="gender">Gender<select id="gender" required>
+                    <option value="">(select one)</option>
+                    <option value="m">Male</option>
+                    <option value="f">Female</option>
+                    <option value="o">Other</option>
+                    </select>
+                    </label>
+                    <label for="city" id="city-label">City: <input id="city" type="text" required></input></label>
+                    <label for="country" id="country-label">Country: <input id="country" type="text" required></input></label>
+                    <label for="password" id="password-label">Password: <input id="signup-password" type="password" minlength="8" required></input></label>
+                    <label for="repeatpassword" id="repeatpassword-label">Repeat password: <input id="signup-repeatpassword" type="password" required></input></label>
+                    <div class="feedback" id="signup-feedback"></div>
+                    <input id="submit" type="submit" value="Sign up"/>
+                </form>
+                </fieldset>
+              </div>
+            </div>
+        </script>
+        <script id="profileview" type="text/view">
+            <h1 class="title">Profile</h1>
+            <div id="tabs">
+                <button class="tab active" data-target="home-panel">Home</button>
+                <button class="tab" data-target="browse-panel">Browse</button>
+                <button class="tab" data-target="account-panel">Account</button>
+              </div>
+              <div id="tab-panels">
+                <!-- Home Panel -->
+                <div id="home-panel" class="tab-panel" style="display: block;">
+                  <div class="profile">
+                    <article class="user">
+                        <img src="default.jpg" alt="profile photo"/>
+                        <article class="about">
+                            <div class="full-name">
+                              <h2 id="firstname"></h2><h2 id="familyname"></h2>
+                            </div>
+                            <div class="info"><p class="field">Email</p><p id="email" class="value"></p></div>                            
+                            <div class="info"><p class="field">Gender</p><p id="gender" class="value"></p></div>
+                            <div class="info"><p class="field">City</p><p id="city" class="value"></p></div>
+                            <div class="info"><p class="field">Country</p><p id="country" class="value"></p></div>
+                        </article>
+                    </article>
+                    <hr class="thin-line">
+                    <div class="post-message">
+                      <textarea id="new-message" placeholder="type a new message..."></textarea>
+                      <button id="post-button" type="button" onclick="postMessage()">Post</button>
+                    </div>             
+                    <div class="feedback" id="post-feedback"></div>         
+                    <hr class="middle-line">
+                  </div>
+                  <div class="wall">
+                        <h2>Your Messages</h2>
+                        <button id="reload" onclick="reloadWall()">Reload</button>
+                        <ul id="wall-messages"></ul>
+                        <div class="feedback" id="wall-feedback"></div>
+                  </div>
+                </div>
+                <!-- Browse Panel -->
+                <div id="browse-panel" class="tab-panel" style="display: none;">
+                  <h2>Browse Content</h2>
+                  <form id="browse-user-form">
+                    <label for="search-email">Enter user's email:</label>
+                    <input id="search-email" type="email" placeholder="example@email.com" required />
+                    <input id="search-others-email" type="submit" value="Search">
+                    <div class="feedback" id="browse-feedback"></div>
+                  </form>
+                  <!-- Searched user's profile and wall -->
+                  <div id="browse-user-home" style="display: none;">
+                    <!-- User profile section -->
+                    <div class="profile">
+                      <main>
+                        <article class="user">
+                            <img src="default.jpg" alt="profile photo"/>
+                            <article class="about">
+                                <div class="full-name">
+                                  <h2 id="browse-firstname"></h2><h2 id="browse-familyname"></h2>
+                                </div>
+                                <div class="info"><p class="field">Email</p><p id="browse-email" class="value"></p></div>                            
+                                <div class="info"><p class="field">Gender</p><p id="browse-gender" class="value"></p></div>
+                                <div class="info"><p class="field">City</p><p id="browse-city" class="value"></p></div>
+                                <div class="info"><p class="field">Country</p><p id="browse-country" class="value"></p></div>
+                            </article>
+                        </article>
+                        <hr class="thin-line">
+                        <div class="post-message">
+                          <textarea id="browse-new-message" placeholder="type a new message..."></textarea>
+                          <button id="browse-post-button" type="button">Post</button>
+                        </div>   
+                        <div class="feedback" id="browse-post-feedback"></div>                   
+                      </main>
+                      <hr class="middle-line">
+                    </div>
+                    <div class="wall">
+                      <h2>User's Messages</h2>
+                      <button id="browse-reload">Reload</button>
+                      <ul id="browse-wall-messages"></ul>
+                      <div class="feedback" id="browse-wall-feedback"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Account Panel -->
+                <div id="account-panel" class="tab-panel" style="display: none;">
+                  <h2>Account Settings</h2>
+                  <form id="change-password-form">
+                    <label for="old-password">Old Password:</label>
+                    <input id="old-password" type="password" minlength="8" required />
+                    <label for="new-password">New Password:</label>
+                    <input id="new-password" type="password" minlength="8" required />
+                    <label for="repeat-new-password">Repeat New Password:</label>
+                    <input id="repeat-new-password" type="password" minlength="8" required />
+                    <input id="change-password-submit" type="submit" value="Submit"/>
+                    <div class="feedback" id="change-password-feedback"></div>
+                  </form>
+                  <!-- Sign Out Button -->
+                  <button id="sign-out-button" style="margin-top: 1rem;  color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                      Sign Out
+                    </button>
+                </div>
+              </div>
+        </script>
+    </head>
+    <body>
+        <div id="view-container"></div>
+    </body>
+</html>
