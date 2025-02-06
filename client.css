@@ -2,7 +2,7 @@
 
 #welcome-container {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   min-height: 400px;
   width: 600px;
