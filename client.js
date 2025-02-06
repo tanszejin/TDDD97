@@ -21,7 +21,6 @@ window.onload = function(){
   //window.alert() is not allowed to be used in your implementation.
   //window.alert("Hello TDDD97!");
   let token = localStorage.getItem("token");
-  const viewContainer = document.getElementById("view-container");
   if (token) {
       displayView("profileview");
   }
@@ -143,19 +142,6 @@ function addEventListeners() {
     error.textContent = message;
     form.appendChild(error);
   }
-
-
-
-  // Clear error message on input
-// passwordField.addEventListener("input", clearErrorMessage);
-// repeatPasswordField.addEventListener("input", clearErrorMessage);
-
-function clearErrorMessage() {
-  const passwordError = document.getElementById("password-error");
-    if (passwordError) {
-      passwordError.remove();
-    }
-}
 };
 
 // Function to initialize tabs
@@ -178,7 +164,7 @@ tabs.forEach((tab) => {
     const targetPanel = document.getElementById(tab.dataset.target);
     targetPanel.style.display = "block";
 
-    // Initialize the change password form if the Account tab is selected
+    // Initialize the displau for each tab
     if (tab.dataset.target === "account-panel") {
       console.log("Account tab opened");
       initializeChangePasswordForm();
@@ -200,7 +186,7 @@ const changePasswordForm = document.getElementById("change-password-form");
 
 if (changePasswordForm) {
   changePasswordForm.onsubmit = function (event) {
-    event.preventDefault(); // Prevent the form from submitting normally
+    event.preventDefault(); // Prevents the form from submitting normally
 
     // Get form field values
     const oldPassword = document.getElementById("old-password").value;
@@ -259,7 +245,7 @@ if (signOutButton) {
 }
 
 function displayHomePanel() {
-  // display user profile
+  // Display user profile
   token = localStorage.getItem("token");
   user = serverstub.getUserDataByToken(token);
   if (user.success) {
@@ -271,17 +257,22 @@ function displayHomePanel() {
     document.getElementById("country").innerHTML = user.data.country;
   }
 
-  // display wall
+  // Display wall
   reloadWall();
 }
 
 function postMessage() {
+  // Get the message in text area
   let msg = document.getElementById("new-message").value;
+
+  // Input validation - check if there is anything written
   if (msg.length == 0) {
     document.getElementById("post-feedback").style = "color: red;"
     document.getElementById("post-feedback").innerHTML = "write a message first dumbass"
     return false;
   }
+
+  // Simulate
   let token = localStorage.getItem("token");
   toPostMessage = serverstub.postMessage(token, msg, serverstub.getUserDataByToken(token).data.email);
   if (toPostMessage.success) {
@@ -294,13 +285,13 @@ function postMessage() {
   document.getElementById("post-feedback").innerHTML = toPostMessage.message;
   }
 
-  function reloadWall() {
+function reloadWall() {
   let token = localStorage.getItem("token");
-  let messages = serverstub.getUserMessagesByToken(token); // array of all messages
+  let messages = serverstub.getUserMessagesByToken(token); // Array of all messages
   if (messages.success) {
     const wall = document.getElementById("wall-messages");
-    wall.innerHTML = "";
-    messages.data.forEach((msg) => {
+    wall.innerHTML = ""; // Clear previous wall
+    messages.data.forEach((msg) => {  // Display each message as a list item
       const listItem = document.createElement("li");
       listItem.innerHTML = `${msg.writer}: ${msg.content}`;
       wall.appendChild(listItem);
