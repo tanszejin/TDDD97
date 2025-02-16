@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS users;
+-- DROP TABLE IF EXISTS users;
 
 CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) UNIQUE NOT NULL,  -- Email (unique)
@@ -17,7 +17,7 @@ VALUES
 ON CONFLICT (email) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS messages (
-    post_by VARCHAR(255) NOT NULL,
-    post_to VARCHAR(255) NOT NULL,
-    message TEXT NOT NULL
+    from_email VARCHAR(255) NOT NULL,
+    to_email VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL
 )
