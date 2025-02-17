@@ -12,7 +12,8 @@ def root():
 def teardown(exception):
     database_helper.disconnect()
 
-logged_in_users = {}
+# initialise with simple values for easy testing
+logged_in_users = {"t":"user@example.com"}
 
 @app.route('/sign_in', methods = ['POST'])
 def sign_in():

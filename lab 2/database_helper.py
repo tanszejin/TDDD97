@@ -59,17 +59,18 @@ def change_password(email:str, newpassword:str) -> bool:
         return False
 
 def get_user_data(email:str):
-    cursor = get_db().execute("select email, firstname, familyname, gender, city, country from users where email like %?%;", [email])
+    cursor = get_db().execute("select email, firstname, familyname, gender, city, country from users where email like ?;", [email])
     matches = cursor.fetchall()
     cursor.close()
     result = []
     for match in matches:
         result.append({'email': match[0], 'firstname': match[1], 'familyname': match[2], 
             'gender': match[3], 'city': match[4], 'country': match[5]})
+    print(result)
     return result
 
 def get_user_messages(email:str) -> list:
-    cursor = get_db().execute("select from_email, message from messages where to_email == ?;", [email])
+    cursor = get_db().execute("select from_email, content from messages where to_email == ?;", [email])
     matches = cursor.fetchall()
     cursor.close()
     result = []
