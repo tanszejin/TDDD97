@@ -5,6 +5,8 @@ import math, random
 import json
 from twiddlerApp import database_helper
 
+#server routes
+
 active_connections = {}
 token_to_socket = {}
 
