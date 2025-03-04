@@ -66,7 +66,6 @@ def get_user_data(email:str):
     for match in matches:
         result.append({'email': match[0], 'firstname': match[1], 'familyname': match[2], 
             'gender': match[3], 'city': match[4], 'country': match[5]})
-    print(result)
     return result
 
 def get_user_messages(email:str) -> list:

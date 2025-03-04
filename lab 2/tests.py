@@ -8,9 +8,9 @@ import traceback
 class FlaskAppTests(unittest.TestCase):
     logging.basicConfig(level=logging.ERROR)
     base_url = "http://127.0.0.1:5000"
-    token = "t"
-    user_email = f'user@example.com'
-    user_email_2 = f'admin@example.com'
+    token = None
+    user_email = f'user{random.randint(1, 100000000)}@example.com'
+    user_email_2 = f'admin{random.randint(1, 100000000)}@example.com'
     random_email = f'test{random.randint(1, 100000000)}@example.com'
 
     def setUp(self):
@@ -132,7 +132,7 @@ class FlaskAppTests(unittest.TestCase):
         passwords = ['password123', 'password1234', None]
         for password in passwords:
             data = {
-                'username': self.user_email,
+                'email': self.user_email,
                 'password': password
             }
 

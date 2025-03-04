@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import math, random
 import database_helper
+import re
 
 app = Flask(__name__)
 
@@ -23,17 +24,24 @@ def sign_in():
     # validate input
     for f in fields:
         if f not in data or data[f] is None or len(data[f]) < 1: 
-            return 'Invalid input', 400
+            response = jsonify({'success':'False', 'message':'Invalid input'})
+            return response, 200
+    
+    # vlaidate email
+    valid = re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', data['email'])
+    if not valid:
+        response = jsonify({'success':'False', 'message':'Invalid email'})
+        return response, 200
 
     # validate email and password
     if '@' not in data['email'] or len(data['password']) < 8:
         response = jsonify({'success':'False', 'message':'Invalid username or password'})
-        return response, 401
+        return response, 200
     
     # validate email exists
     if not database_helper.user_exists(data['email']):
         response = jsonify({'success':'False', 'message':'Invalid username'})
-        return response, 400
+        return response, 200
 
     resp = database_helper.get_user_password(data['email'])
     if resp:
@@ -43,15 +51,15 @@ def sign_in():
             token = generate_token()
             logged_in_users[token] = data['email']      # add token to dictionary of logged in users
             response = jsonify({'success':'True', 'message':'Successfully signed in', 'data':token})
-            response.headers['Authorisation'] = f'Bearer {token}'   # authorisation header for sending and receiving token
+            response.headers['Authorization'] = f'{token}'   # authorisation header for sending and receiving token
             return response, 200
         else:
             # incorrect password
             response = jsonify({'success':'False', 'message':'Incorrect password'})
-            return response, 401
+            return response, 200
     else:
-        response = jsonify({'success':'False', 'message':'Incorrect username or password'})
-        return response, 401
+        response = jsonify({'success':'False', 'message':'No password received'})
+        return response, 200
 
 
 def generate_token():       # algorithm is taken from serverstub
@@ -71,12 +79,19 @@ def sign_up():
     # validate input
     for f in fields:
         if f not in data or data[f] is None or len(data[f]) < 1: 
-            return 'Invalid input', 400
+            response = jsonify({'success':'False', 'message':'Invalid email'})
+            return response, 200
+        
+    # vlaidate email
+    valid = re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', data['email'])
+    if not valid:
+        response = jsonify({'success':'False', 'message':'Invalid email'})
+        return response, 200
     
     # check if user already exists
     if database_helper.user_exists(data['email']):
         response = jsonify({'success':'False', 'message':'User already exists'})
-        return response, 400
+        return response, 200
     
     # create user
     data_list = [data[f] for f in fields]
@@ -85,50 +100,59 @@ def sign_up():
         return response, 201
     else:
         response = jsonify({'success':'False', 'message':'Unable to create user'})
-        return response, 400
+        return response, 200
 
 
-@app.route('/sign_out', methods = ['POST'])
+@app.route('/sign_out', methods = ['DELETE'])
 def sign_out():
-    data = request.get_json()
-    fields = ['token']
+    try:
+        token = request.headers['Authorization']
+    except:
+        response = jsonify({'success':'False', 'message':'Token does not exist'})
+        return response, 200
 
     # validate input
-    for f in fields:
-        if f not in data or data[f] is None or len(data[f]) < 1: 
-            return 'Invalid input', 400
+    if not token:
+        response = jsonify({'success':'False', 'message':'Invalid input'})
+        return response, 200
         
     try:
-        logged_in_users.pop(data['token'])
+        logged_in_users.pop(token)
         response = jsonify({'success':'True', 'message':'Successfully signed out'})
         return response, 200
     except:
         # token is not in dictionary of logged in users
         response = jsonify({'success':'False', 'message':'Token does not exist'})
-        return response, 400
+        return response, 200
 
 
 @app.route('/change_password', methods = ['PUT'])
 def change_password():
     data = request.get_json()
-    fields = ['token', 'oldpassword', 'newpassword']
+    fields = ['oldpassword', 'newpassword']
+    try:
+        token = request.headers['Authorization']
+    except:
+        response = jsonify({'success':'False', 'message':'Token does not exist'})
+        return response, 200
 
     # validate input
     for f in fields:
         if f not in data or data[f] is None or len(data[f]) < 1: 
-            return 'Invalid input', 400
+            response = jsonify({'success':'False', 'message':'Invalid input'})
+            return response, 200
         
     # validate token
-    if data['token'] not in logged_in_users:
+    if not token or token not in logged_in_users:
         response = jsonify({'success':'False', 'message':'Token does not exist'})
-        return response, 400
+        return response, 200
     
     # validate new password
     if len(data['newpassword']) < 8:
         response = jsonify({'success':'False', 'message':'Invalid new password'})
-        return response, 400
+        return response, 200
 
-    email = logged_in_users[data['token']]
+    email = logged_in_users[token]
 
     resp = database_helper.get_user_password(email)
     if resp:
@@ -136,11 +160,11 @@ def change_password():
         if data['oldpassword'] != resp['password']:
             # incorrect password
             response = jsonify({'success':'False', 'message':'Incorrect old password'})
-            return response, 401
+            return response, 200
     else:
         # no user with that email found
         response = jsonify({'success':'False', 'message':'Unable to find user'})
-        return response, 400
+        return response, 200
     
     # update password
     if database_helper.change_password(email, data['newpassword']):
@@ -148,97 +172,105 @@ def change_password():
         return response, 200
     else:
         response = jsonify({'success':'False', 'message':'Unable to change password'})
-        return response, 400
+        return response, 200
 
 
 @app.route('/get_user_data_by_token', methods = ['GET'])
 def get_user_data_by_token():
-    data = request.get_json()
-    fields = ['token']
+    try:
+        token = request.headers['Authorization']
+    except:
+        response = jsonify({'success':'False', 'message':'Token does not exist'})
+        return response, 200
 
-    # validate input
-    for f in fields:
-        if f not in data or data[f] is None or len(data[f]) < 1: 
-            return 'Invalid input', 400
+    if not token:
+        response = jsonify({'success':'False', 'message':'Token does not exist'})
+        return response, 200
     
     # validate token
-    if data['token'] not in logged_in_users:
+    if token not in logged_in_users:
         response = jsonify({'success':'False', 'message':'Token does not exist'})
-        return response, 400
+        return response, 200
     
-    email = logged_in_users[data['token']]
+    email = logged_in_users[token]
     resp = database_helper.get_user_data(email)
-    response = jsonify({'success':'True', 'message':'User data obtained', 'data':resp[0]})
+    response = jsonify({'success':'True', 'message':'User data obtained', 'data':resp})
     return response, 200
 
 
-@app.route('/get_user_data_by_email', methods = ['GET'])
-def get_user_data_by_email():
-    data = request.get_json()
-    fields = ['token', 'email']
+@app.route('/get_user_data_by_email/<email>', methods = ['GET'])
+def get_user_data_by_email(email):
+    try:
+        token = request.headers['Authorization']
+    except:
+        response = jsonify({'success':'False', 'message':'Token does not exist'})
+        return response, 200
 
-    # validate input
-    for f in fields:
-        if f not in data or data[f] is None or len(data[f]) < 1: 
-            return 'Invalid input', 400
+    if not token or not email:
+        response = jsonify({'success':'False', 'message':'Token does not exist'})
+        return response, 200
     
     # validate token
-    if data['token'] not in logged_in_users:
+    if token not in logged_in_users:
         response = jsonify({'success':'False', 'message':'Token does not exist'})
-        return response, 400
+        return response, 200
     
     # validate email exists
-    if not database_helper.user_exists(data['email']):
+    if not database_helper.user_exists(email):
         response = jsonify({'success':'False', 'message':'User does not exist'})
-        return response, 400
+        return response, 200
     
-    resp = database_helper.get_user_data(data['email'])
+    resp = database_helper.get_user_data(email)
     response = jsonify({'success':'True', 'message':'User data obtained', 'data':resp})
     return response, 200
 
 
 @app.route('/get_user_messages_by_token', methods = ['GET'])
 def get_user_messages_by_token():
-    data = request.get_json()
-    fields = ['token']
+    try:
+        token = request.headers['Authorization']
+    except:
+        response = jsonify({'success':'False', 'message':'Token does not exist'})
+        return response, 200
 
-    # validate input
-    for f in fields:
-        if f not in data or data[f] is None or len(data[f]) < 1: 
-            return 'Invalid input', 400
+    if not token:
+        response = jsonify({'success':'False', 'message':'Token does not exist'})
+        return response, 200
     
     # validate token
-    if data['token'] not in logged_in_users:
+    if token not in logged_in_users:
         response = jsonify({'success':'False', 'message':'Token does not exist'})
-        return response, 400
+        return response, 200
     
-    email = logged_in_users[data['token']]
+    email = logged_in_users[token]
     resp = database_helper.get_user_messages(email)
     response = jsonify({'success':'True', 'message':'User messages obtained', 'data':resp})
     return response, 200
 
 
-@app.route('/get_user_messages_by_email', methods = ['GET'])
-def get_user_messages_by_email():
-    data = request.get_json()
-    fields = ['token', 'email']
+@app.route('/get_user_messages_by_email/<email>', methods = ['GET'])
+def get_user_messages_by_email(email):
+    try:
+        token = request.headers['Authorization']
+    except:
+        response = jsonify({'success':'False', 'message':'Token does not exist'})
+        return response, 200
 
-    # validate input
-    for f in fields:
-        if f not in data or data[f] is None or len(data[f]) < 1: 
-            return 'Invalid input', 400
+    if not token or not email:
+        response = jsonify({'success':'False', 'message':'Token does not exist'})
+        return response, 200
     
     # validate token
-    if data['token'] not in logged_in_users:
+    if token not in logged_in_users:
         response = jsonify({'success':'False', 'message':'Token does not exist'})
-        return response, 400
+        return response, 200
     
     # validate email exists
-    if not database_helper.user_exists(data['email']):
+    if not database_helper.user_exists(email):
         response = jsonify({'success':'False', 'message':'User does not exist'})
-        return response, 400
+        return response, 200
     
-    resp = database_helper.get_user_messages(data['email'])
+    resp = database_helper.get_user_messages(email)
     response = jsonify({'success':'True', 'message':'User messages obtained', 'data':resp})
     return response, 200
 
@@ -246,30 +278,40 @@ def get_user_messages_by_email():
 @app.route('/post_message', methods = ['POST'])
 def post_message():
     data = request.get_json()
-    fields = ['token', 'message', 'email']
+    fields = ['message', 'email']
+    try:
+        token = request.headers['Authorization']
+    except:
+        response = jsonify({'success':'False', 'message':'Token does not exist'})
+        return response, 200
+
+    if not token:
+        response = jsonify({'success':'False', 'message':'Token does not exist'})
+        return response, 200
 
     # validate input
     for f in fields:
         if f not in data or data[f] is None or len(data[f]) < 1: 
-            return 'Invalid input', 400
+            response = jsonify({'success':'False', 'message':'Invalid input'})
+            return response, 200
     
     # validate token
-    if data['token'] not in logged_in_users:
+    if token not in logged_in_users:
         response = jsonify({'success':'False', 'message':'Token does not exist'})
-        return response, 400
+        return response, 200
     
     # validate email exists
     if not database_helper.user_exists(data['email']):
         response = jsonify({'success':'False', 'message':'User does not exist'})
-        return response, 400
+        return response, 200
     
-    from_email = logged_in_users[data['token']]
+    from_email = logged_in_users[token]
     if database_helper.post_message(from_email, data['email'], data['message']):
         response = jsonify({'success':'True', 'message':'Message posted successfully'})
         return response, 201
     else:
         response = jsonify({'success':'False', 'message':'Unable to post message'})
-        return response, 400       
+        return response, 200       
 
 
 if __name__ == '__main__':
