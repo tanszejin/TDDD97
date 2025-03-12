@@ -1,9 +1,9 @@
 from flask import request, jsonify
 from flask_sock import Sock
-from twiddlerApp import app, sock
+from twidderApp import app, sock
 import math, random
 import json
-from twiddlerApp import database_helper
+from twidderApp import database_helper
 import re
 
 #server routes

@@ -3,4 +3,4 @@ from flask_sock import Sock
 app = Flask(__name__)
 sock = Sock(app)
 
-import twiddlerApp.views
+import twidderApp.views
