@@ -106,8 +106,8 @@ const displayView = function (viewId) {
     }
     else{
       disconnectWebSocket();
-    }
-    addEventListeners();
+      addEventListeners();
+    }    
   } else {
     console.error(`View with ID "${viewId}" not found.`);
   }
@@ -124,10 +124,8 @@ window.onload = function(){
   }
   else {
       displayView("welcomeview");
-  }
-  displayView("welcomeview");
-
-  addEventListeners();
+      addEventListeners();
+  }  
 };
 
 function addEventListeners() {
@@ -147,6 +145,8 @@ function addEventListeners() {
     if (passwordError) {
       passwordError.remove();
     }
+    const feedbackElement = document.getElementById('signin-feedback');
+    feedbackElement.innerHTML = ""
 
     // Validate password length
     const minLength = 8;
@@ -156,7 +156,6 @@ function addEventListeners() {
       return false;
     }
     const email = document.getElementById("signin-email").value;
-    const feedbackElement = document.getElementById('signin-feedback');
 
     // If validations pass, allow form submission
 
@@ -184,34 +183,49 @@ function addEventListeners() {
       
       // Try to parse as JSON
       const data = await response.json();
-      
-      // Display feedback message
-      feedbackElement.innerHTML = data.message || "Unknown response";
-      
+
+      if (!response.ok) {
+        switch (response.status) {
+          case 400:
+            throw new Error("It seems that your input is invalid. Please check your input.");
+          case 401:
+            throw new Error("Your password is incorrect. Please try again.");
+          case 404:
+            throw new Error("No such user exists. Please try again.");
+          case 405:
+            throw new Error("Invalid request method. Please try again.");
+          case 500:
+            throw new Error("Something went wrong on the server.");
+          default:
+            throw new Error(`${response.status} Error: Unexpected response.`);
+        }
+      }  
+
       // Handle successful sign-in
       if (response.ok && data.success === 'True') {
         console.log("sign in successful")
+        feedbackElement.innerHTML = "Signed in successfully";
+
         // Store the token in localStorage
         localStorage.setItem("token", data.data);
-        
+
         // Get the token from the authorization header if available
-        const authHeader = response.headers.get('Authorisation');
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-          const tokenFromHeader = authHeader.substring(7);
-          console.log("Token from header:", tokenFromHeader);
-        }
+        // const authHeader = response.headers.get('Authorization');
+        // if (authHeader) {
+        //   const tokenFromHeader = authHeader;
+        //   console.log("Token from header:", tokenFromHeader);
+        // }
         
         // Switch to profile view
         displayView("profileview");
         return true;
       } else {
-        // Handle sign-in failure
-        console.error("Sign-in failed:", data.message);
+        console.error("This should not happen");
         return false;
       }
     } catch (error) {
       console.error('Sign in error:', error);
-      feedbackElement.innerHTML = "Network or server error. Please try again.";
+      feedbackElement.innerHTML = error.message || 'Failed to sign in. Please try again.';
       return false;
     }
   };
@@ -243,6 +257,8 @@ function addEventListeners() {
     if (passwordError) {
       passwordError.remove();
     }
+    const feedbackElement = document.getElementById('signup-feedback');
+    feedbackElement.innerHTML = "";
 
     // Validate password length
     const minLength = 8;
@@ -273,7 +289,6 @@ function addEventListeners() {
       country: document.getElementById("country").value
     };
 
-    const feedbackElement = document.getElementById('signup-feedback');
     feedbackElement.innerHTML = "Signing up...";
 
     try {
@@ -291,11 +306,23 @@ function addEventListeners() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.message || 'Error signing up');
+        switch (response.status) {
+          case 400:
+              throw new Error("It seems that your input is invalid. Please check your input.");
+          case 405:
+              throw new Error("Invalid request method. Please try again.");
+          case 409:
+              throw new Error("A user with this email already exists! Please use another email.");
+          case 500:
+              throw new Error("Something went wrong on the server.");
+          default:
+              throw new Error(`${response.status} Error: Unexpected response.`);
+        }        
       }
       
       // Display success message
-      feedbackElement.innerHTML = data.message;
+      feedbackElement.style.color = "green";
+      feedbackElement.innerHTML = "You have signed up successfully!";
       
       if (data.success === 'True') {
         // Optional: You could redirect to sign-in page or clear the form
@@ -305,6 +332,7 @@ function addEventListeners() {
       }
     } catch (error) {
       console.error('Sign up error:', error);
+      feedbackElement.style.color = "red";
       feedbackElement.innerHTML = error.message || 'Failed to sign up. Please try again.';
     }
 
@@ -384,48 +412,62 @@ if (changePasswordForm) {
       return;
     }
 
-    try{
-    // Get token from localStorage
-    const token = localStorage.getItem("token");
-    console.log("Retrieved token for password change:", token);
-    
-    // Prepare data for API call
-    const requestData = {
-      token: token,
-      oldpassword: oldPassword,
-      newpassword: newPassword
-    };
-
-    // Call the change_password endpoint
-    const response = await fetch('/change_password', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestData)
-    });
-    
-    console.log("Change password response status:", response.status);
-
-    // Parse JSON response
-    const data = await response.json();
+    try {
+      // Get token from localStorage
+      const token = localStorage.getItem("token");
+      console.log("Retrieved token for password change:", token);
       
-    if (!response.ok) {
-      throw new Error(data.message || 'Error changing password');
-    }
+      // Prepare data for API call
+      const requestData = {
+        oldpassword: oldPassword,
+        newpassword: newPassword
+      };
 
-    // Display feedback based on server response
-    feedbackElement.textContent = data.message;
-    if (data.success === 'True') {
-      feedbackElement.style.color = "green";
-    } else {
+      // Call the change_password endpoint
+      const response = await fetch('/change_password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify(requestData)
+      });
+      
+      console.log("Change password response status:", response.status);
+
+      // Parse JSON response
+      const data = await response.json();
+        
+      if (!response.ok) {
+        switch (response.status) {
+          case 400:
+            throw new Error("It seems that your input is invalid. Please check your input.");
+          case 401:
+            throw new Error("Your old password is incorrect. Please try again.");
+          case 404:
+            throw new Error("No such user exists. Please try again.");
+          case 405:
+            throw new Error("Invalid request method. Please try again.");
+          case 500:
+            throw new Error("Something went wrong on the server.");
+          default:
+            throw new Error(`${response.status} Error: Unexpected response.`);
+        }
+      }
+      
+      if (response.ok && data.success === 'True') {
+        feedbackElement.style.color = "green";
+        feedbackElement.textContent = data.message;
+      } else {
+        feedbackElement.style.color = "red";
+        feedbackElement.textContent = "This should not happen";
+      }
+    }
+    catch (error) {
+      console.error("Change password error:", error);
       feedbackElement.style.color = "red";
+      feedbackElement.textContent = error.message;
     }
-
-  }
-  catch (error) {
-    console.error("Change password error:", error);
-  }
   };
 }
 }
@@ -447,20 +489,15 @@ if (signOutButton) {
         return;
       }
       
-      // Prepare data for API call
-      const requestData = {
-        token: token
-      };
-      
       console.log("Sending sign-out request with token:", token);
       
       // Call the sign_out endpoint
       const response = await fetch('/sign_out', {
-        method: 'POST',
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
+          'Authorization': token
+        }
       });
       
       console.log("Sign-out response status:", response.status);
@@ -478,6 +515,21 @@ if (signOutButton) {
         // If we can't parse the response, assume sign-out failed
         return;
       }
+
+      if (!response.ok) {
+        switch (response.status) {
+          case 400:
+            throw new Error("It seems that your input is invalid. Please check your input.");
+          case 401:            
+            throw new Error("It seems that you are not logged in.");
+          case 405:
+            throw new Error("Invalid request method. Please try again.");
+          case 500:
+            throw new Error("Something went wrong on the server.");
+          default:
+            throw new Error(`${response.status} Error: Unexpected response.`);
+        }
+      }  
       
       // Check if sign-out was successful
       if (response.ok && data.success === 'True') {
@@ -490,18 +542,10 @@ if (signOutButton) {
         displayView("welcomeview");
         console.log("Redirected to welcome view after sign-out");
       } else {
-        console.error("Sign-out failed:", data.message);
-        
-        // If the token doesn't exist on the server, we should still sign out locally
-        if (response.status === 400 && data.message === "Token does not exist") {
-          console.log("Token not found on server, signing out locally");
-          localStorage.removeItem("token");
-          displayView("welcomeview");
-        }
+        console.log("This should not happen")        
       }
     } catch (error) {
-      console.error("Sign-out error:", error);
-      
+      console.error("Sign-out error:", error);      
       // In case of network error, sign out locally anyway
       localStorage.removeItem("token");
       displayView("welcomeview");
@@ -517,35 +561,49 @@ if (signOutButton) {
 
 async function displayHomePanel() {
   // Display user profile
-  token = localStorage.getItem("token");
-  const requestData = {
-    token: token
-  };
-  const response = await fetch('/get_user_data_by_token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(requestData)
-  });
-  
-  console.log("get user data by token response status:", response.status);
-  // Parse JSON response
-  const data = await response.json();
-      
-  if (!response.ok) {
-    throw new Error(data.message || 'Error changing password');
-  }
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch('/get_user_data_by_token', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token
+      }
+    });
+    
+    console.log("get user data by token response status:", response.status);
 
-  if (data.success === 'True') {
-    document.getElementById("email").innerHTML = data.data.email;
-    document.getElementById("firstname").innerHTML = data.data.firstname;
-    document.getElementById("familyname").innerHTML = data.data.familyname;
-    document.getElementById("gender").innerHTML = data.data.gender;
-    document.getElementById("city").innerHTML = data.data.city;
-    document.getElementById("country").innerHTML = data.data.country;
-  }
+    // Parse JSON response
+    const data = await response.json();
+        
+    if (!response.ok) {
+      switch(response.status) {
+        case 400:
+          throw new Error("It seems that your input is invalid. Please check your input.");
+        case 401:
+          throw new Error("It seems that you are not logged in. Please refresh the page and log in.");
+        case 405:
+          throw new Error("Invalid request method. Please try again.");
+        case 500:
+          throw new Error("Something went wrong on the server.");
+        default:
+          throw new Error(`${response.status} Error: Unexpected response.`);
+      }
+    }
 
+    if (response.ok && data.success === 'True') {
+      document.getElementById("email").innerHTML = data.data.email;
+      document.getElementById("firstname").innerHTML = data.data.firstname;
+      document.getElementById("familyname").innerHTML = data.data.familyname;
+      document.getElementById("gender").innerHTML = data.data.gender;
+      document.getElementById("city").innerHTML = data.data.city;
+      document.getElementById("country").innerHTML = data.data.country;
+    }
+  }
+  catch (error) {
+    console.error('Display home panel error:', error);
+    document.getElementById("email").innerHTML = error.message || 'Failed to display user data. Please try again.';
+  }
   // Display wall
   reloadWall();
 }
@@ -557,77 +615,118 @@ async function postMessage() {
   // Input validation - check if there is anything written
   if (msg.length == 0) {
     document.getElementById("post-feedback").style = "color: red;"
-    document.getElementById("post-feedback").innerHTML = "write a message first dumbass"
+    document.getElementById("post-feedback").innerHTML = "Write a message first!"
     return false;
   }
 
-  let token = localStorage.getItem("token");
-  const emailElement = document.getElementById("email");
-  let userEmail = emailElement.textContent;
+  try {
+    let token = localStorage.getItem("token");
+    const emailElement = document.getElementById("email");
+    let userEmail = emailElement.textContent;
 
-  const postData = {
-    token: token,
-    message: msg,
-    email: userEmail // Posting to the user's own wall
-  };
+    const postData = {
+      message: msg,
+      email: userEmail // Posting to the user's own wall
+    };
 
-  const response = await fetch('/post_message', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(postData)
-  });
+    const response = await fetch('/post_message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token
+      },
+      body: JSON.stringify(postData)
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (data.success === 'True') {
-    // Clear the message box
-    document.getElementById("new-message").value = "";
-    document.getElementById("post-feedback").style = "color: green;";
-    document.getElementById("post-feedback").innerHTML = data.message;
-    
-    // Refresh the wall to show the new message
-    reloadWall();
-    return true;
-  } 
-  else {
-    document.getElementById("post-feedback").style = "color: red;";
-    document.getElementById("post-feedback").innerHTML = data.message;
+    if (!response.ok) {
+      switch (response.status) {
+        case 400:
+          throw new Error("It seems that your input is invalid. Please check your input.");
+        case 401:
+          throw new Error("It seems that you are not logged in. Please log in first");
+        case 404:
+          throw new Error("No such user exists. Please try again.");
+        case 405:
+          throw new Error("Invalid request method. Please try again.");
+        case 500:
+          throw new Error("Something went wrong on the server.");
+        default:
+          throw new Error(`${response.status} Error: Unexpected response.`);
+      }
+    }
+
+    if (response.ok && data.success === 'True') {
+      // Clear the message box
+      document.getElementById("new-message").value = "";
+      document.getElementById("post-feedback").style = "color: green;";
+      document.getElementById("post-feedback").innerHTML = "Message posted successfully!";
+      
+      // Refresh the wall to show the new message
+      reloadWall();
+      return true;
+    } 
+    else {
+      document.getElementById("post-feedback").innerHTML = "This should not happen";
+    }
+  }
+  catch (error) {
+    console.error('Post message error:', error);
+    document.getElementById("post-feedback").innerHTML = error.message || 'Failed to post message. Please try again.';
     return false;
   }
 }
 
 async function reloadWall() {
-  let token = localStorage.getItem("token");
-  const requestData = {
-    token: token
-  };
-  const response = await fetch('/get_user_messages_by_token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(requestData)
-  });
-
-  const data = await response.json();
-  console.log("Data array:", data.data);
-  if (data.success === 'True') {
-    const wall = document.getElementById("wall-messages");
-    wall.innerHTML = ""; // Clear previous wall
-    
-    // Display each message as a list item
-    data.data.forEach((msg) => {
-      const listItem = document.createElement("li");
-      listItem.innerHTML = `${msg.writer}: ${msg.message}`;
-      wall.appendChild(listItem);
+  try {
+    let token = localStorage.getItem("token");
+    const response = await fetch('/get_user_messages_by_token', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token
+      }
     });
-    
-    // Clear any previous error messages
-    document.getElementById("wall-feedback").innerHTML = "";
-  } else {
-    document.getElementById("wall-feedback").innerHTML = data.message;
+
+    const data = await response.json();
+    console.log("Data array:", data.data);
+
+    if (!response.ok) {
+      switch (response.status) {
+        case 400:
+          throw new Error("It seems that your input is invalid. Please check your input.");
+        case 401:
+          throw new Error("It seems that you are not logged in. Please log in first.");
+        case 405:
+          throw new Error("Invalid request method. Please try again.");
+        case 500:
+          throw new Error("Something went wrong on the server.");
+        default:
+          throw new Error(`${response.status} Error: Unexpected response.`);
+      }
+    }  
+
+    if (response.ok && data.success === 'True') {
+      const wall = document.getElementById("wall-messages");
+      wall.innerHTML = ""; // Clear previous wall
+      
+      // Display each message as a list item
+      data.data.forEach((msg) => {
+        const listItem = document.createElement("li");
+        listItem.innerHTML = `${msg.writer}: ${msg.message}`;
+        wall.appendChild(listItem);
+      });
+      
+      // Clear any previous error messages
+      document.getElementById("wall-feedback").innerHTML = "";
+    } else {
+      document.getElementById("wall-feedback").innerHTML = "This should not happen";
+    }
+  }
+  catch (error) {
+    console.error('Reload wall error:', error);
+    document.getElementById("wall-feedback").innerHTML = error.message || 'Failed to reload wall. Please try again.';
   }
 }
 
@@ -658,139 +757,220 @@ async function initializeBrowseTab() {
     browseFeedback.textContent = ""; // Clear feedback
     browseUserHome.style.display = "none"; // Hide user profile until found
 
-    // Fetch user info from the server
-    const token = localStorage.getItem("token");
-    const requestData = {
-      token: token,
-      email: email
-    };
-    const response = await fetch('/get_user_data_by_email', {
-      method: 'POST', // Change to POST to allow sending a body
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    });
+    try {
+      // Fetch user info from the server
+      const token = localStorage.getItem("token");
+      const response = await fetch('/get_user_data_by_email/'+email, {
+        method: 'GET', 
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': token
+        }
+      });
 
-    const userData = await response.json();
-    console.log("userdata: ", userData.data);
+      const userData = await response.json();
+      console.log("userdata: ", userData.data);
 
-    if (userData.success === 'True') {
-      // Update user info section
-      currentBrowseUserEmail = email;
-      browseFeedback.textContent = "";
-      browseUserHome.style.display = "block";
-      browseUserInfo.email.textContent = userData.data[0].email;
-      browseUserInfo.firstname.textContent = userData.data[0].firstname;
-      browseUserInfo.familyname.textContent = userData.data[0].familyname;
-      browseUserInfo.gender.textContent = userData.data[0].gender;
-      browseUserInfo.city.textContent = userData.data[0].city;
-      browseUserInfo.country.textContent = userData.data[0].country;
+      if (!response.ok) {
+        switch (response.status) {
+          case 400:
+            throw new Error("It seems that your input is invalid. Please check your input.");
+          case 401:
+            throw new Error("It seems that you are not logged in. Please log in first.");
+          case 404:
+            throw new Error("No such user exists. Please try again.");
+          case 405:
+            throw new Error("Invalid request method. Please try again.");
+          case 500:
+            throw new Error("Something went wrong on the server.");
+          default:
+            throw new Error(`${response.status} Error: Unexpected response.`);
+        }
+      }  
 
-      // Load the wall for the searched user
-      loadBrowseWall(email);
-    } else {
-      browseFeedback.textContent = userData.message;
+      if (response.ok && userData.success === 'True') {
+        // Update user info section
+        currentBrowseUserEmail = email;
+        browseFeedback.textContent = "";
+        browseUserHome.style.display = "block";
+        browseUserInfo.email.textContent = userData.data[0].email;
+        browseUserInfo.firstname.textContent = userData.data[0].firstname;
+        browseUserInfo.familyname.textContent = userData.data[0].familyname;
+        browseUserInfo.gender.textContent = userData.data[0].gender;
+        browseUserInfo.city.textContent = userData.data[0].city;
+        browseUserInfo.country.textContent = userData.data[0].country;
+
+        // Load the wall for the searched user
+        loadBrowseWall(email);
+      } else {
+        browseFeedback.textContent = "This should not happen"
+      }
+    }
+    catch (error) {
+      console.error('Browse user error:', error);
+      browseFeedback.textContent = error.message || 'Failed to show users. Please try again.';
     }
   };
 
   // Load the wall of the searched user
   async function loadBrowseWall(email) {
     browseWallMessages.innerHTML = ""; // Clear previous wall messages
-    const token = localStorage.getItem("token");
-    
-    requestData = {
-      token: token,
-      email: email
-    };
+    try {
+      const token = localStorage.getItem("token");
 
-    const response = await fetch('/get_user_messages_by_email', {
-      method: 'POST', // Change to POST to allow sending a body
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      data.data.forEach((message) => {
-        const listItem = document.createElement("li");
-        listItem.textContent = `${message.writer}: ${message.message}`;
-        browseWallMessages.appendChild(listItem);
+      const response = await fetch('/get_user_messages_by_email/'+email, {
+        method: 'GET', // Change to POST to allow sending a body
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        }
       });
-    } else {
-      browseWallMessages.innerHTML = `<li>${data.message}</li>`;
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        switch (response.status) {
+          case 400:
+            throw new Error("It seems that your input is invalid. Please check your input.");
+          case 401:
+            throw new Error("It seems that you are not logged in. Please log in first.");
+          case 404:
+            throw new Error("No such user exists. Please try again.");
+          case 405:
+            throw new Error("Invalid request method. Please try again.");
+          case 500:
+            throw new Error("Something went wrong on the server.");
+          default:
+            throw new Error(`${response.status} Error: Unexpected response.`);
+        }
+      }  
+
+      if (response.ok && data.success) {
+        data.data.forEach((message) => {
+          const listItem = document.createElement("li");
+          listItem.textContent = `${message.writer}: ${message.message}`;
+          browseWallMessages.appendChild(listItem);
+        });
+      } else {
+        console.log("This should not happen")
+      }
     }
-  }
-
-  async function browsePostMessage() {
-    let msg = document.getElementById("browse-new-message").value;
-    if (msg.length == 0) {
-      document.getElementById("browse-post-feedback").innerHTML = "write a message first dumbass"
-      return false;
+    catch (error) {
+      console.error('Browse wall error:', error);
+      browseWallMessages.innerHTML = `<li>${error.message}</li>`;
     }
-    let token = localStorage.getItem("token");
 
-    const postData = {
-      token: token,
-      message: msg,
-      email: currentBrowseUserEmail // Posting to the user's own wall
-    };
+    async function browsePostMessage() {
+      let msg = document.getElementById("browse-new-message").value;
+      if (msg.length == 0) {
+        document.getElementById("browse-post-feedback").innerHTML = "Write a message first!"
+        return false;
+      }
 
-    const response = await fetch('/post_message', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(postData)
-    });
+      try {
+        let token = localStorage.getItem("token");
 
-    const data = await response.json();
+        const postData = {
+          message: msg,
+          email: currentBrowseUserEmail // Posting to the user's own wall
+        };
 
-    if (data.success === 'True') {
-      document.getElementById("browse-new-message").value = "";
+        const response = await fetch('/post_message', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+          },
+          body: JSON.stringify(postData)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          switch (response.status) {
+            case 400:
+              throw new Error("It seems that your input is invalid. Please check your input.");
+            case 401:
+              throw new Error("It seems that you are not logged in. Please log in first.");
+            case 404:
+              throw new Error("No such user exists. Please try again.");
+            case 405:
+              throw new Error("Invalid request method. Please try again.");
+            case 500:
+              throw new Error("Something went wrong on the server.");
+            default:
+              throw new Error(`${response.status} Error: Unexpected response.`);
+          }
+        }  
+
+        if (response.ok && data.success === 'True') {
+          document.getElementById("browse-new-message").value = "";
+          document.getElementById("browse-post-feedback").style = "color: green;";
+          document.getElementById("browse-post-feedback").innerHTML = "Message posted successfully.";
+          browseReloadWall();
+        }        
+      }
+      catch (error) {
+        console.error('Browse post messsage error:', error);
+        document.getElementById("browse-post-feedback").style = "color: red;";
+        document.getElementById("browse-post-feedback") = error.message || 'Failed to post message to browsed user. Please try again.';
+      }
     }
-    document.getElementById("browse-post-feedback").innerHTML = data.message;
-  }
 
-  const browsePostButton = document.getElementById("browse-post-button");
-  browsePostButton.onclick = browsePostMessage;
+    const browsePostButton = document.getElementById("browse-post-button");
+    browsePostButton.onclick = browsePostMessage;
 
 
-  async function browseReloadWall() {
-    const token = localStorage.getItem("token");
-    
-    requestData = {
-      token: token,
-      email: currentBrowseUserEmail
-    };
+    async function browseReloadWall() {
+      try {
+        const token = localStorage.getItem("token");
 
-    const response = await fetch('/get_user_messages_by_email', {
-      method: 'POST', // Change to POST to allow sending a body
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestData)
-    });
+        const response = await fetch('/get_user_messages_by_email/'+email, {
+          method: 'GET', // Change to POST to allow sending a body
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+          }
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (data.success) {
-      const wall = document.getElementById("browse-wall-messages");
-      wall.innerHTML = "";
-      data.data.forEach((msg) => {
-        const listItem = document.createElement("li");
-        listItem.innerHTML = `${msg.writer}: ${msg.message}`;
-        wall.appendChild(listItem);
-      });
+        if (!response.ok) {
+          switch (response.status) {
+            case 400:
+              throw new Error("It seems that your input is invalid. Please check your input.");
+            case 401:
+              throw new Error("It seems that you are not logged in. Please log in first.");
+            case 404:
+              throw new Error("No such user exists. Please try again.");
+            case 405:
+              throw new Error("Invalid request method. Please try again.");
+            case 500:
+              throw new Error("Something went wrong on the server.");
+            default:
+              throw new Error(`${response.status} Error: Unexpected response.`);
+          }
+        }  
+
+        if (response.ok && data.success) {
+          const wall = document.getElementById("browse-wall-messages");
+          wall.innerHTML = "";
+          data.data.forEach((msg) => {
+            const listItem = document.createElement("li");
+            listItem.innerHTML = `${msg.writer}: ${msg.message}`;
+            wall.appendChild(listItem);
+          });
+        }
+        else {
+          console.log("This should not happen");
+        }
+      }
+      catch (error) {
+        console.error('Browse reload wall error:', error);
+        document.getElementById("browse-wall-feedback").innerHTML = error.message || "Failed to reload browsed user's wall. Please try again.";
+      }
     }
-    else {
-      document.getElementById("browse-wall-feedback").innerHTML = data.message;
-    }
-  }
-
-  const browseReloadButton = document.getElementById("browse-reload");
-  browseReloadButton.onclick = browseReloadWall;
+    const browseReloadButton = document.getElementById("browse-reload");
+    browseReloadButton.onclick = browseReloadWall;
+  }  
 }
