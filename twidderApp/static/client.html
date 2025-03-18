@@ -69,7 +69,7 @@
                     </article>
                     <hr class="thin-line">
                     <div class="post-message">
-                      <textarea id="new-message" placeholder="type a new message..."></textarea>
+                      <textarea id="new-message" placeholder="type a new message..." ondrop="dropHandler(event)" ondragover="dragoverHandler(event)"></textarea>
                       <button id="post-button" type="button" onclick="postMessage()">Post</button>
                     </div>             
                     <div class="feedback" id="post-feedback"></div>         
@@ -110,7 +110,7 @@
                         </article>
                         <hr class="thin-line">
                         <div class="post-message">
-                          <textarea id="browse-new-message" placeholder="type a new message..."></textarea>
+                          <textarea id="browse-new-message" placeholder="type a new message..." ondrop="dropHandler(event)" ondragover="dragoverHandler(event)"></textarea>
                           <button id="browse-post-button" type="button">Post</button>
                         </div>   
                         <div class="feedback" id="browse-post-feedback"></div>                   

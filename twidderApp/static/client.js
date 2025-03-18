@@ -788,6 +788,9 @@ async function reloadWall() {
           // Display each message as a list item
           data.data.forEach((msg) => {
             const listItem = document.createElement("li");
+            listItem.class = "wall-message";
+            listItem.draggable = true;
+            listItem.ondragstart = dragstartHandler;
             listItem.innerHTML = `${msg.writer}: ${msg.message}`;
             wall.appendChild(listItem);
           });
@@ -926,6 +929,9 @@ async function initializeBrowseTab() {
         if (xhr.status >= 200 && xhr.status < 300 && data.success) {
           data.data.forEach((message) => {
             const listItem = document.createElement("li");
+            listItem.class = "browse-wall-message";
+            listItem.draggable = true;
+            listItem.ondragstart = dragstartHandler;
             listItem.textContent = `${message.writer}: ${message.message}`;
             browseWallMessages.appendChild(listItem);
           });
@@ -1042,6 +1048,9 @@ async function initializeBrowseTab() {
           wall.innerHTML = "";
           data.data.forEach((msg) => {
             const listItem = document.createElement("li");
+            listItem.class = "browse-wall-message";
+            listItem.draggable = true;
+            listItem.ondragstart = dragstartHandler;
             listItem.innerHTML = `${msg.writer}: ${msg.message}`;
             wall.appendChild(listItem);
           });
@@ -1080,4 +1089,23 @@ async function initializeBrowseTab() {
   const browseReloadButton = document.getElementById("browse-reload");
   browseReloadButton.onclick = browseReloadWall;
 }  
+
+// for drag and drop functionality
+function dragstartHandler(ev) {
+  message_array = ev.target.innerHTML.split(":");
+  message_array.shift();
+  message = message_array.join(":");
+  ev.dataTransfer.setData("text", message);
+}
+
+function dragoverHandler(ev) {
+  ev.preventDefault();
+}
+
+function dropHandler(ev) {
+  ev.preventDefault();
+  const data = ev.dataTransfer.getData("text");
+  console.log(data);
+  ev.target.value = data;
+}
 
