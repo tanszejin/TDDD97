@@ -94,7 +94,14 @@ function disconnectWebSocket() {
     socket = null;
   }
 }
-// Function to display a view dynamically
+
+// Add this helper function for Mustache rendering
+function renderTemplate(templateId, data = {}) {
+  const template = document.getElementById(templateId).innerHTML;
+  return Mustache.render(template, data);
+}
+
+// Modified displayView function to use Mustache templates
 const displayView = function (viewId) {
   const viewElement = document.getElementById(viewId);
 
