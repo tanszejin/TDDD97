@@ -28,3 +28,12 @@ INSERT INTO messages (from_email, to_email, content)
 VALUES 
     ('user@example.com', 'admin@example.com', 'from user to admin'),  
     ('admin@example.com', 'user@example.com', 'from admin to user');
+
+CREATE TABLE IF NOT EXISTS logged_in_users (
+    email VARCHAR(255) UNIQUE NOT NULL,
+    token VARCHAR(255) NOT NULL
+);
+
+-- INSERT INTO logged_in_users (email, token)
+-- VALUES 
+--     ('loggedin@example.com', 't');
