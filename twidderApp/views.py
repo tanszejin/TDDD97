@@ -389,8 +389,8 @@ def get_user_messages_by_email(email):
         return response, 400
     
     # validate token
-    email = database_helper.get_email_by_token(token)
-    if not email:
+    user_email = database_helper.get_email_by_token(token)
+    if not user_email:
         response = jsonify({'success':'False', 'message':'Token does not exist, user not logged in'})
         return response, 401
     

@@ -227,7 +227,7 @@ function addEventListeners() {
             case 500:
               throw new Error("Something went wrong on the server.");
             default:
-              throw new Error(`${response.status} Error: Unexpected response.`);
+              throw new Error(`${xhr.status} Error: Unexpected response.`);
           }
         }
       } catch (error) {
@@ -324,7 +324,7 @@ function addEventListeners() {
         // Parse the JSON response
         const data = JSON.parse(xhr.responseText);
         
-        if (xhr.status === 201 || xhr.status === 200) {
+        if (xhr.status === 201) {
           // Success
           feedbackElement.innerHTML = data.message;
           
@@ -346,7 +346,7 @@ function addEventListeners() {
             case 500:
                 throw new Error("Something went wrong on the server.");
             default:
-                throw new Error(`${response.status} Error: Unexpected response.`);
+                throw new Error(`${xhr.status} Error: Unexpected response.`);
           }
         }
       } catch (error) {
@@ -488,7 +488,7 @@ if (changePasswordForm) {
             case 500:
               throw new Error("Something went wrong on the server.");
             default:
-              throw new Error(`${response.status} Error: Unexpected response.`);
+              throw new Error(`${xhr.status} Error: Unexpected response.`);
           }
         }
       } catch (error) {
@@ -722,7 +722,7 @@ async function postMessage() {
       // Parse the JSON response
       const data = JSON.parse(xhr.responseText);
       
-      if (data.success === 'True') {
+      if (xhr.status >= 200 && xhr.status < 300 && data.success === 'True') {
         // Clear the message box
         document.getElementById("new-message").value = "";
         document.getElementById("post-feedback").style = "color: green;";
@@ -745,7 +745,7 @@ async function postMessage() {
           case 500:
             throw new Error("Something went wrong on the server.");
           default:
-            throw new Error(`${response.status} Error: Unexpected response.`);
+            throw new Error(`${xhr.status} Error: Unexpected response.`);
         }
       }
     } catch (error) {
@@ -781,7 +781,7 @@ async function reloadWall() {
         const data = JSON.parse(xhr.responseText);
         console.log("Data array:", data.data);
         
-        if (data.success === 'True') {
+        if (xhr.status >= 200 && xhr.status < 300 && data.success === 'True') {
           const wall = document.getElementById("wall-messages");
           wall.innerHTML = ""; // Clear previous wall
           
@@ -805,7 +805,7 @@ async function reloadWall() {
             case 500:
               throw new Error("Something went wrong on the server.");
             default:
-              throw new Error(`${response.status} Error: Unexpected response.`);
+              throw new Error(`${xhr.status} Error: Unexpected response.`);
           }
         }
       } catch (error) {
@@ -863,7 +863,7 @@ async function initializeBrowseTab() {
         const userData = JSON.parse(xhr.responseText);
         console.log("userdata: ", userData.data);
         
-        if (userData.success === 'True') {
+        if (xhr.status >= 200 && xhr.status < 300 && userData.success === 'True') {
           // Update user info section
           currentBrowseUserEmail = email;
           browseFeedback.textContent = "";
@@ -876,7 +876,7 @@ async function initializeBrowseTab() {
           browseUserInfo.country.textContent = userData.data[0].country;
 
           // Load the wall for the searched user
-          loadBrowseWall(email);
+          loadBrowseWall(currentBrowseUserEmail);
         } else {
           switch (xhr.status) {
             case 400:
@@ -890,7 +890,7 @@ async function initializeBrowseTab() {
             case 500:
               throw new Error("Something went wrong on the server.");
             default:
-              throw new Error(`${response.status} Error: Unexpected response.`);
+              throw new Error(`${xhr.status} Error: Unexpected response.`);
           }
         }
       } catch (error) {
@@ -923,7 +923,7 @@ async function initializeBrowseTab() {
         // Parse the JSON response
         const data = JSON.parse(xhr.responseText);
         
-        if (data.success) {
+        if (xhr.status >= 200 && xhr.status < 300 && data.success) {
           data.data.forEach((message) => {
             const listItem = document.createElement("li");
             listItem.textContent = `${message.writer}: ${message.message}`;
@@ -942,7 +942,7 @@ async function initializeBrowseTab() {
             case 500:
               throw new Error("Something went wrong on the server.");
             default:
-              throw new Error(`${response.status} Error: Unexpected response.`);
+              throw new Error(`${xhr.status} Error: Unexpected response.`);
           }
         }
       } catch (error) {
@@ -983,7 +983,7 @@ async function initializeBrowseTab() {
         // Parse the JSON response
         const data = JSON.parse(xhr.responseText);
         
-        if (data.success === 'True') {
+        if (xhr.status >= 200 && xhr.status < 300 && data.success === 'True') {
           document.getElementById("browse-new-message").value = "";
           document.getElementById("browse-post-feedback").style = "color: green;";
           document.getElementById("browse-post-feedback").innerHTML = "Message posted successfully.";
@@ -1002,7 +1002,7 @@ async function initializeBrowseTab() {
             case 500:
               throw new Error("Something went wrong on the server.");
             default:
-              throw new Error(`${response.status} Error: Unexpected response.`);
+              throw new Error(`${xhr.status} Error: Unexpected response.`);
           }
         }
       } catch (error) {
@@ -1037,7 +1037,7 @@ async function initializeBrowseTab() {
         // Parse the JSON response
         const data = JSON.parse(xhr.responseText);
         
-        if (data.success) {
+        if (xhr.status >= 200 && xhr.status < 300) {
           const wall = document.getElementById("browse-wall-messages");
           wall.innerHTML = "";
           data.data.forEach((msg) => {
@@ -1059,7 +1059,7 @@ async function initializeBrowseTab() {
             case 500:
               throw new Error("Something went wrong on the server.");
             default:
-              throw new Error(`${response.status} Error: Unexpected response.`);
+              throw new Error(`${xhr.status} Error: Unexpected response.`);
           }
         }
       } catch (error) {
