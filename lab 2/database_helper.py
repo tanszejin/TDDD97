@@ -24,6 +24,31 @@ def initialise_db():
     con.commit()
     con.close()
 
+def add_logged_in_user(email:str, token:str):
+    try:
+        get_db().execute("insert into logged_in_users values(?,?);", [email, token])
+        get_db().commit()
+        return True
+    except:
+        return False
+
+def get_email_from_token(token:str):
+    cursor = get_db().execute("select email from logged_in_users where token == ?;", [token])
+    match = cursor.fetchone()
+    cursor.close()
+    if match:
+        return match[0]
+    else:
+        return None
+
+def remove_logged_in_user(token:str):
+    try:
+        get_db().execute("delete from logged_in_users where token == ?", [token])
+        get_db().commit()
+        return True
+    except:
+        return False
+
 def get_user_password(email:str):
     cursor = get_db().execute("select email, password from users where email == ?;", [email])
     match = cursor.fetchone()
