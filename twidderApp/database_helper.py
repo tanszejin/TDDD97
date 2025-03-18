@@ -9,6 +9,7 @@ def get_db():
     db = getattr(g, 'db', None)
     if db is None:
         db = g.db = sqlite3.connect(DATABASE_URI)
+        db.row_factory = sqlite3.Row
     return db
 
 def disconnect():
@@ -86,4 +87,96 @@ def post_message(from_email:str, to_email:str, content:str) -> bool:
         get_db().commit()
         return True
     except:
+        return False
+    
+def ensure_tokens_table_exists():
+    """Make sure the tokens table exists in the database"""
+    try:
+        get_db().execute('''
+        CREATE TABLE IF NOT EXISTS tokens (
+            token TEXT PRIMARY KEY,
+            email TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (email) REFERENCES users (email)
+        );
+        ''')
+        get_db().commit()
+        return True
+    except Exception as e:
+        print(f"Error creating tokens table: {e}")
+        return False
+
+def store_token(token:str, email:str) -> bool:
+    """Store a token in the database with no expiration"""
+    try:
+        # Ensure tokens table exists
+        ensure_tokens_table_exists()
+        
+        # First remove any existing tokens for this email
+        get_db().execute("DELETE FROM tokens WHERE email = ?;", [email])
+        
+        # Insert new token
+        get_db().execute(
+            "INSERT INTO tokens (token, email) VALUES (?, ?);",
+            [token, email]
+        )
+        get_db().commit()
+        return True
+    except Exception as e:
+        print(f"Error storing token: {e}")
+        return False
+
+def get_email_by_token(token:str) -> str:
+    """Get the email associated with a token"""
+    try:
+        # Ensure tokens table exists
+        ensure_tokens_table_exists()
+        
+        cursor = get_db().execute(
+            "SELECT email FROM tokens WHERE token = ?;",
+            [token]
+        )
+        result = cursor.fetchone()
+        cursor.close()
+        
+        if result:
+            return result['email']
+        
+        return None
+    except Exception as e:
+        print(f"Error getting email by token: {e}")
+        return None
+
+def get_token_by_email(email:str) -> str:
+    """Get the token associated with an email"""
+    try:
+        # Ensure tokens table exists
+        ensure_tokens_table_exists()
+        
+        cursor = get_db().execute(
+            "SELECT token FROM tokens WHERE email = ?;",
+            [email]
+        )
+        result = cursor.fetchone()
+        cursor.close()
+        
+        if result:
+            return result['token']
+        
+        return None
+    except Exception as e:
+        print(f"Error getting token by email: {e}")
+        return None
+
+def remove_token(token:str) -> bool:
+    """Remove a token from the database"""
+    try:
+        # Ensure tokens table exists
+        ensure_tokens_table_exists()
+        
+        get_db().execute("DELETE FROM tokens WHERE token = ?;", [token])
+        get_db().commit()
+        return True
+    except Exception as e:
+        print(f"Error removing token: {e}")
         return False

@@ -12,6 +12,13 @@ CREATE TABLE IF NOT EXISTS users (
     country VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS tokens (
+    token TEXT PRIMARY KEY,
+    email TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (email) REFERENCES users (email)
+);
+
 INSERT INTO users (email, password, firstname, familyname, gender, city, country)
 VALUES 
     ('user@example.com', 'password123', 'Test', 'User', 'm', 'Linkoping', 'Sweden'),  

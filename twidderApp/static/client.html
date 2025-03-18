@@ -6,44 +6,44 @@
         <link href="/static/client.css" type="text/css" rel="stylesheet">        
         <script src="/static/serverstub .js" defer></script>
         <script src="/static/client.js" defer></script>
-
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
         <script id="welcomeview" type="text/view">
-            <!-- <h1 class="title">Welcome</h1> -->
-            <div id="welcome-container">
-              <img src="/static/wimage.png"/>
-              <div id="forms">
-                <fieldset id="signin-fieldset">
-                <!-- <h2>Sign in:</h2> -->
-                <form id="signin-form">
-                    <label for="email" class="field" id="signin-email-label">Email:</label><input class="value" id="signin-email" type="email" placeholder="example@email.com" required></input>
-                    <label for="password" class="field" id="password-label">Password:</label><input class="value" id="signin-password" type="password" minlength="8" required></input>
-                    <div class="feedback" class="field" id="signin-feedback"></div>
-                    <input id="submit" type="submit" value="Sign in"/>
-                </form>
-                </fieldset>
-                <fieldset id="signup-fieldset">
-                <!-- <h3>New user? Sign up here:</h3> -->
-                <form id="signup-form">
-                    <label for="firstname" class="field" id="firstname-label">First name:</label><input class="value" id="firstname" type="text" placeholder="John" required></input>
-                    <label for="familyname" class="field" id="familyname-label">Family name:</label><input class="value" id="familyname" type="text" placeholder="Doe" required></input>
-                    <label for="email" class="field" id="signup-email-label">Email:</label><input class="value" id="signup-email" type="email" placeholder="example@email.com" required></input>
-                    <label for="gender" class="field">Gender</label><select class="value" id="gender" required>
-                    <option value="">(select one)</option>
-                    <option value="m">Male</option>
-                    <option value="f">Female</option>
-                    <option value="o">Other</option>
-                    </select>
-                    <label for="city" class="field" id="city-label">City:</label><input class="value" id="city" type="text" required></input>
-                    <label for="country" class="field" id="country-label">Country:</label><input class="value" id="country" type="text" required></input>
-                    <label for="password" class="field" id="password-label">Password:</label><input class="value" id="signup-password" type="password" minlength="8" required></input>
-                    <label for="repeatpassword" class="field" id="repeatpassword-label">Repeat pw:</label><input class="value" id="signup-repeatpassword" type="password" required></input>
-                    <div class="feedback" id="signup-feedback"></div>
-                    <input id="submit" type="submit" value="Sign up"/>
-                </form>
-                </fieldset>
-              </div>
+          <!-- <h1 class="title">Welcome</h1> -->
+          <div id="welcome-container">
+            <img src="/static/wimage.png"/>
+            <div id="forms">
+              <fieldset id="signin-fieldset">
+              <!-- <h2>Sign in:</h2> -->
+              <form id="signin-form">
+                  <label for="email" class="field" id="signin-email-label">Email:</label><input class="value" id="signin-email" type="email" placeholder="example@email.com" required></input>
+                  <label for="password" class="field" id="password-label">Password:</label><input class="value" id="signin-password" type="password" minlength="8" required></input>
+                  <div class="feedback" class="field" id="signin-feedback"></div>
+                  <input id="submit" type="submit" value="Sign in"/>
+              </form>
+              </fieldset>
+              <fieldset id="signup-fieldset">
+              <!-- <h3>New user? Sign up here:</h3> -->
+              <form id="signup-form">
+                  <label for="firstname" class="field" id="firstname-label">First name:</label><input class="value" id="firstname" type="text" placeholder="John" required></input>
+                  <label for="familyname" class="field" id="familyname-label">Family name:</label><input class="value" id="familyname" type="text" placeholder="Doe" required></input>
+                  <label for="email" class="field" id="signup-email-label">Email:</label><input class="value" id="signup-email" type="email" placeholder="example@email.com" required></input>
+                  <label for="gender" class="field">Gender</label><select class="value" id="gender" required>
+                  <option value="">(select one)</option>
+                  <option value="m">Male</option>
+                  <option value="f">Female</option>
+                  <option value="o">Other</option>
+                  </select>
+                  <label for="city" class="field" id="city-label">City:</label><input class="value" id="city" type="text" required></input>
+                  <label for="country" class="field" id="country-label">Country:</label><input class="value" id="country" type="text" required></input>
+                  <label for="password" class="field" id="password-label">Password:</label><input class="value" id="signup-password" type="password" minlength="8" required></input>
+                  <label for="repeatpassword" class="field" id="repeatpassword-label">Repeat pw:</label><input class="value" id="signup-repeatpassword" type="password" required></input>
+                  <div class="feedback" id="signup-feedback"></div>
+                  <input id="submit" type="submit" value="Sign up"/>
+              </form>
+              </fieldset>
             </div>
-        </script>
+          </div>
+      </script>
         <script id="profileview" type="text/view">
             <h1 class="title">Profile</h1>
             <div id="tabs">
