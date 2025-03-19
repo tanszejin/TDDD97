@@ -703,9 +703,13 @@ async function postMessage() {
   const emailElement = document.getElementById("email");
   let userEmail = emailElement.textContent;
 
+  const coords = await getLocation()
+
   const postData = {
     message: msg,
-    email: userEmail // Posting to the user's own wall
+    email: userEmail, // Posting to the user's own wall
+    latitude: coords.latitude.toString(),
+    longitude: coords.longitude.toString()
   };
       // Create a new XMLHttpRequest
   const xhr = new XMLHttpRequest();
@@ -792,6 +796,13 @@ async function reloadWall() {
             listItem.draggable = true;
             listItem.ondragstart = dragstartHandler;
             listItem.innerHTML = `${msg.writer}: ${msg.message}`;
+            const divItem = document.createElement("div");
+            divItem.class = "wall-message-location";
+            divItem.style = "font-size: 9px"
+            const coordinates = `${msg.latitude},${msg.longitude}`;
+            get_address_from_coordinates(coordinates)
+              .then(address => divItem.innerHTML = `sent from ${address}`);
+            listItem.appendChild(divItem);
             wall.appendChild(listItem);
           });
           
@@ -825,6 +836,25 @@ async function reloadWall() {
   
     // Send the request with data
     xhr.send();
+}
+
+async function get_address_from_coordinates(coordinates) {
+  const url = `https://geocode.xyz/${coordinates}?json=1&auth=10437519277611469283x94815 `;  
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("HTTP Error for geolocation");
+    const data = await response.json();
+    if (data.error) {
+      console.error("Error:", data.error.description);
+      return null;
+    }
+    console.log("User Location:", data.city, data.country);
+    return `${data.staddress}, ${data.city}, ${data.country}`;
+  }
+  catch (error) {
+    console.error("error fetching location", error.message);
+    return null;
+  }
 }
 
 async function initializeBrowseTab() {
@@ -933,6 +963,13 @@ async function initializeBrowseTab() {
             listItem.draggable = true;
             listItem.ondragstart = dragstartHandler;
             listItem.textContent = `${message.writer}: ${message.message}`;
+            const divItem = document.createElement("div");
+            divItem.class = "browse-wall-message-location";
+            divItem.style = "font-size: 9px"
+            const coordinates = `${message.latitude},${message.longitude}`;
+            get_address_from_coordinates(coordinates)
+              .then(address => divItem.innerHTML = `sent from ${address}`);
+            listItem.appendChild(divItem);
             browseWallMessages.appendChild(listItem);
           });
         } else {
@@ -975,9 +1012,12 @@ async function initializeBrowseTab() {
       return false;
     }
     let token = localStorage.getItem("token");
+    const coords = await getLocation();
     const postData = {
       message: msg,
-      email: currentBrowseUserEmail // Posting to the user's own wall
+      email: currentBrowseUserEmail, // Posting to the user's own wall
+      latitude: coords.latitude.toString(),
+      longitude: coords.longitude.toString()
     };
     console.log("email to post to: " + currentBrowseUserEmail);
     const xhr = new XMLHttpRequest();
@@ -1052,6 +1092,13 @@ async function initializeBrowseTab() {
             listItem.draggable = true;
             listItem.ondragstart = dragstartHandler;
             listItem.innerHTML = `${msg.writer}: ${msg.message}`;
+            const divItem = document.createElement("div");
+            divItem.class = "browse-wall-message-location";
+            divItem.style = "font-size: 9px"
+            const coordinates = `${msg.latitude},${msg.longitude}`;
+            get_address_from_coordinates(coordinates)
+              .then(address => divItem.innerHTML = `sent from ${address}`);
+            listItem.appendChild(divItem);
             wall.appendChild(listItem);
           });
         }
@@ -1092,9 +1139,10 @@ async function initializeBrowseTab() {
 
 // for drag and drop functionality
 function dragstartHandler(ev) {
-  message_array = ev.target.innerHTML.split(":");
+  const textValue = ev.target.textContent.replace(ev.target.querySelector("div")?.textContent || "", "").trim();
+  const message_array = textValue.split(":");
   message_array.shift();
-  message = message_array.join(":");
+  const message = message_array.join(":");
   ev.dataTransfer.setData("text", message);
 }
 
@@ -1108,4 +1156,19 @@ function dropHandler(ev) {
   console.log(data);
   ev.target.value = data;
 }
+
+// geolocation
+async function getLocation() {
+  if (navigator.geolocation) {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject);
+    }).then(position => position.coords);
+  }
+  else {
+    console.log("Geolocation not supported by this browser");
+    return {latitude: "", longitude: ""};
+  }
+}
+
+
 

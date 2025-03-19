@@ -1,6 +1,7 @@
--- drop all tables first 
+--drop all tables first 
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS tokens;
 
 CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) UNIQUE NOT NULL,  
@@ -28,10 +29,12 @@ ON CONFLICT (email) DO NOTHING;
 CREATE TABLE IF NOT EXISTS messages (
     from_email VARCHAR(255) NOT NULL,
     to_email VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL
+    content TEXT NOT NULL,
+    latitude VARCHAR(255),
+    longitude VARCHAR(255)
 );
 
-INSERT INTO messages (from_email, to_email, content)
-VALUES 
-    ('user@example.com', 'admin@example.com', 'from user to admin'),  
-    ('admin@example.com', 'user@example.com', 'from admin to user');
+-- INSERT INTO messages (from_email, to_email, content)
+-- VALUES 
+--     ('user@example.com', 'admin@example.com', 'from user to admin'),  
+--     ('admin@example.com', 'user@example.com', 'from admin to user');

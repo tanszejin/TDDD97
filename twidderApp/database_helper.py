@@ -3,8 +3,6 @@ from flask import g
 import os
 DATABASE_URI = os.path.join(os.path.dirname(__file__), 'database.db')
 
-# DATABASE_URI = "/twiddlerApp/database.db"
-
 def get_db():
     db = getattr(g, 'db', None)
     if db is None:
@@ -73,22 +71,42 @@ def get_user_data(email:str):
     return result
 
 def get_user_messages(email:str) -> list:
-    cursor = get_db().execute("select from_email, content from messages where to_email == ?;", [email])
+    # make_new_messages_table()
+
+    cursor = get_db().execute("select * from messages where to_email == ?;", [email])
     matches = cursor.fetchall()
     cursor.close()
     result = []
     for match in matches:
-        result.append({'writer': match[0], 'message': match[1]})
+        result.append({'writer': match['from_email'], 'message': match['content'], 'latitude': match['latitude'], 'longitude': match['longitude']})
     return result
 
-def post_message(from_email:str, to_email:str, content:str) -> bool:
+def post_message(from_email:str, to_email:str, content:str, latitude:str, longitude:str) -> bool:
     try:    
-        get_db().execute("insert into messages values(?,?,?);", [from_email, to_email, content])
+        get_db().execute("insert into messages values(?,?,?,?,?);", [from_email, to_email, content, latitude, longitude])
         get_db().commit()
         return True
     except:
         return False
-    
+
+# def make_new_messages_table():
+#     try:
+#         get_db().execute('DROP TABLE IF EXISTS messages;')
+#         get_db().execute('''
+#         CREATE TABLE IF NOT EXISTS messages (
+#             from_email VARCHAR(255) NOT NULL,
+#             to_email VARCHAR(255) NOT NULL,
+#             content TEXT NOT NULL,
+#             latitude VARCHAR(255),
+#             longitude VARCHAR(255)
+#         );
+#         ''')
+#         get_db().commit()
+#         return True
+#     except Exception as e:
+#         print(f"Error creating messages table: {e}")
+#         return False
+
 def ensure_tokens_table_exists():
     """Make sure the tokens table exists in the database"""
     try:

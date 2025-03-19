@@ -5,6 +5,7 @@ import math, random
 import json
 from twidderApp import database_helper
 import re
+import requests
 
 #server routes
 
@@ -415,7 +416,7 @@ def post_message():
         return response, 405
     
     data = request.get_json()
-    fields = ['message', 'email']
+    fields = ['message', 'email']  # latitude and longitude can be null
     try:
         token = request.headers['Authorization']
     except:
@@ -443,14 +444,35 @@ def post_message():
         response = jsonify({'success':'False', 'message':'User not found'})
         return response, 404
     
+    # user_ip = request.remote_addr
+    # print(user_ip)
+    # coordinates = get_coordinates_from_ip(user_ip)    
     from_email = email
-    if database_helper.post_message(from_email, data['email'], data['message']):
+    if database_helper.post_message(from_email, data['email'], data['message'], data['latitude'], data['longitude']):
         response = jsonify({'success':'True', 'message':'Message posted successfully'})
         return response, 201
     else:
         response = jsonify({'success':'False', 'message':'Internal server error'})
         return response, 500       
 
+def get_coordinates_from_ip(ip):
+    url = f"https://geocode.xyz/{ip}?json=1&auth=10437519277611469283x94815 "
+    # url = f"https://geocode.xyz"
+    # data = {
+    #     'locate': f'{ip}',
+    #     'geoit': 'XML'
+    # }
+    try:
+        resp = requests.get(url)
+        resp.raise_for_status()
+        result = resp.json()
+        if "error" in result:
+            print(result['error']['description'])
+            return None
+        return {'latitude': result.get('latt'), 'longitude': result.get('longt')}
+    except:
+        print('Error getting location')
+        return None
 
 if __name__ == '__main__':
     with app.app_context():    
