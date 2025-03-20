@@ -455,24 +455,24 @@ def post_message():
         response = jsonify({'success':'False', 'message':'Internal server error'})
         return response, 500       
 
-def get_coordinates_from_ip(ip):
-    url = f"https://geocode.xyz/{ip}?json=1&auth=10437519277611469283x94815 "
-    # url = f"https://geocode.xyz"
-    # data = {
-    #     'locate': f'{ip}',
-    #     'geoit': 'XML'
-    # }
-    try:
-        resp = requests.get(url)
-        resp.raise_for_status()
-        result = resp.json()
-        if "error" in result:
-            print(result['error']['description'])
-            return None
-        return {'latitude': result.get('latt'), 'longitude': result.get('longt')}
-    except:
-        print('Error getting location')
-        return None
+# def get_coordinates_from_ip(ip):
+#     url = f"https://geocode.xyz/{ip}?json=1&auth=10437519277611469283x94815 "
+#     # url = f"https://geocode.xyz"
+#     # data = {
+#     #     'locate': f'{ip}',
+#     #     'geoit': 'XML'
+#     # }
+#     try:
+#         resp = requests.get(url)
+#         resp.raise_for_status()
+#         result = resp.json()
+#         if "error" in result:
+#             print(result['error']['description'])
+#             return None
+#         return {'latitude': result.get('latt'), 'longitude': result.get('longt')}
+#     except:
+#         print('Error getting location')
+#         return None
 
 if __name__ == '__main__':
     with app.app_context():    

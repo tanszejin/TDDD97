@@ -197,7 +197,7 @@ function addEventListeners() {
         feedbackElement.innerHTML = data.message || "Unknown response";
         
         // Handle successful sign-in
-        if (xhr.status >= 200 && xhr.status < 300 && data.success === 'True') {
+        if (xhr.status === 200 && data.success === 'True') {
           console.log("sign in successful");
           
           // Store the token in localStorage
@@ -466,7 +466,7 @@ if (changePasswordForm) {
         // Parse the JSON response
         const data = JSON.parse(xhr.responseText);
         
-        if (xhr.status >= 200 && xhr.status < 300) {
+        if (xhr.status === 200) {
           // Success
           feedbackElement.textContent = data.message;
           if (data.success === 'True') {
@@ -726,7 +726,7 @@ async function postMessage() {
       // Parse the JSON response
       const data = JSON.parse(xhr.responseText);
       
-      if (xhr.status >= 200 && xhr.status < 300 && data.success === 'True') {
+      if (xhr.status === 201 && data.success === 'True') {
         // Clear the message box
         document.getElementById("new-message").value = "";
         document.getElementById("post-feedback").style = "color: green;";
@@ -785,7 +785,7 @@ async function reloadWall() {
         const data = JSON.parse(xhr.responseText);
         console.log("Data array:", data.data);
         
-        if (xhr.status >= 200 && xhr.status < 300 && data.success === 'True') {
+        if (xhr.status === 200 && data.success === 'True') {
           const wall = document.getElementById("wall-messages");
           wall.innerHTML = ""; // Clear previous wall
           
@@ -896,7 +896,7 @@ async function initializeBrowseTab() {
         const userData = JSON.parse(xhr.responseText);
         console.log("userdata: ", userData.data);
         
-        if (xhr.status >= 200 && xhr.status < 300 && userData.success === 'True') {
+        if (xhr.status === 200 && userData.success === 'True') {
           // Update user info section
           currentBrowseUserEmail = email;
           browseFeedback.textContent = "";
@@ -956,7 +956,7 @@ async function initializeBrowseTab() {
         // Parse the JSON response
         const data = JSON.parse(xhr.responseText);
         
-        if (xhr.status >= 200 && xhr.status < 300 && data.success) {
+        if (xhr.status === 200 && data.success) {
           data.data.forEach((message) => {
             const listItem = document.createElement("li");
             listItem.class = "browse-wall-message";
@@ -1029,7 +1029,7 @@ async function initializeBrowseTab() {
         // Parse the JSON response
         const data = JSON.parse(xhr.responseText);
         
-        if (xhr.status >= 200 && xhr.status < 300 && data.success === 'True') {
+        if (xhr.status === 201 && data.success === 'True') {
           document.getElementById("browse-new-message").value = "";
           document.getElementById("browse-post-feedback").style = "color: green;";
           document.getElementById("browse-post-feedback").innerHTML = "Message posted successfully.";
@@ -1083,7 +1083,7 @@ async function initializeBrowseTab() {
         // Parse the JSON response
         const data = JSON.parse(xhr.responseText);
         
-        if (xhr.status >= 200 && xhr.status < 300) {
+        if (xhr.status === 200) {
           const wall = document.getElementById("browse-wall-messages");
           wall.innerHTML = "";
           data.data.forEach((msg) => {
