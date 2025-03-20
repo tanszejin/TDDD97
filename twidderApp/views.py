@@ -197,7 +197,7 @@ def sign_out():
     # validate input
     if not token:
         response = jsonify({'success':'False', 'message':'Token is null'})
-        return response, 400
+        return response, 401
     
     email = database_helper.get_email_by_token(token)
     if email:
@@ -232,7 +232,7 @@ def change_password():
     # validate input
     if not token:
         response = jsonify({'success':'False', 'message':'Token is null'})
-        return response, 400
+        return response, 401
 
     # validate input
     for f in fields:
@@ -286,7 +286,7 @@ def get_user_data_by_token():
     # validate input
     if not token:
         response = jsonify({'success':'False', 'message':'Token is null'})
-        return response, 400
+        return response, 401
     
     # validate token
     email = database_helper.get_email_by_token(token)
@@ -319,7 +319,7 @@ def get_user_data_by_email(email):
     # validate input
     if not token:
         response = jsonify({'success':'False', 'message':'Token is null'})
-        return response, 400
+        return response, 401
     
     # validate token
     if not database_helper.get_email_by_token(token):
@@ -355,7 +355,7 @@ def get_user_messages_by_token():
     # validate input
     if not token:
         response = jsonify({'success':'False', 'message':'Token is null'})
-        return response, 400
+        return response, 401
     
     # validate token
     email = database_helper.get_email_by_token(token)
@@ -387,7 +387,7 @@ def get_user_messages_by_email(email):
     # validate input
     if not token:
         response = jsonify({'success':'False', 'message':'Token is null'})
-        return response, 400
+        return response, 401
     
     # validate token
     user_email = database_helper.get_email_by_token(token)
@@ -426,7 +426,7 @@ def post_message():
     # validate input
     if not token:
         response = jsonify({'success':'False', 'message':'Token is null'})
-        return response, 400
+        return response, 401
 
     # validate input
     for f in fields:
