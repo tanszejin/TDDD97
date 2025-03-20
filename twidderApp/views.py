@@ -192,7 +192,7 @@ def sign_out():
         token = request.headers['Authorization']
     except:
         response = jsonify({'success':'False', 'message':'No token in header'})
-        return response, 400
+        return response, 401
 
     # validate input
     if not token:
@@ -227,7 +227,7 @@ def change_password():
         token = request.headers['Authorization']
     except:
         response = jsonify({'success':'False', 'message':'No token in header'})
-        return response, 400
+        return response, 401
 
     # validate input
     if not token:
@@ -281,7 +281,7 @@ def get_user_data_by_token():
         token = request.headers['Authorization']
     except:
         response = jsonify({'success':'False', 'message':'No token in header'})
-        return response, 400
+        return response, 401
 
     # validate input
     if not token:
@@ -314,7 +314,7 @@ def get_user_data_by_email(email):
         token = request.headers['Authorization']
     except:
         response = jsonify({'success':'False', 'message':'No token in header'})
-        return response, 400
+        return response, 401
 
     # validate input
     if not token:
@@ -350,7 +350,7 @@ def get_user_messages_by_token():
         token = request.headers['Authorization']
     except:
         response = jsonify({'success':'False', 'message':'No token in header'})
-        return response, 400
+        return response, 401
 
     # validate input
     if not token:
@@ -382,7 +382,7 @@ def get_user_messages_by_email(email):
         token = request.headers['Authorization']
     except:
         response = jsonify({'success':'False', 'message':'No token in header'})
-        return response, 400
+        return response, 401
 
     # validate input
     if not token:
@@ -421,7 +421,7 @@ def post_message():
         token = request.headers['Authorization']
     except:
         response = jsonify({'success':'False', 'message':'No token in header'})
-        return response, 400
+        return response, 401
 
     # validate input
     if not token:
